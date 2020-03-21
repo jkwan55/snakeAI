@@ -2,167 +2,164 @@ import turtle
 import time
 import random
 
-delay = 0.1
-score = 0
-high_score = 0
 
-#set up the screen
-window = turtle.Screen()
-window.title("SnakeAI")
-window.bgcolor("black")
-window.setup(width=800, height=800)
-window.screensize(790, 790)
-window.tracer(0)
+class Snake:
+    def __init__(self):
+        self.delay = 0.1
+        self.score = 0
+        self.high_score = 0
 
-#snake
-head = turtle.Turtle()
-head.speed(0)
-head.shape("square")
-head.color("white")
-head.penup()
-head.goto(0, 0)
-head.direction = "stop"
+        # set up the screen
+        self.window = turtle.Screen()
+        self.window.title("SnakeAI")
+        self.window.bgcolor("black")
+        self.window.setup(width=800, height=800)
+        self.window.screensize(790, 790)
+        self.window.tracer(0)
 
-wall = turtle.Turtle()
-wall.speed(0)
-wall.shape("square")
-wall.color("green")
-wall.penup()
-wall.goto(-400, 400)
-wall.pensize(20)
-wall.pendown()
-for i in range(4):
-    wall.forward(800)
-    wall.right(90)
-wall.penup()
+        # snake
+        self.head = turtle.Turtle()
+        self.head.speed(0)
+        self.head.shape("square")
+        self.head.color("white")
+        self.head.penup()
+        self.head.goto(0, 0)
+        self.head.direction = "stop"
 
+        self.wall = turtle.Turtle()
+        self.wall.speed(0)
+        self.wall.shape("square")
+        self.wall.color("green")
+        self.wall.penup()
+        self.wall.goto(-400, 400)
+        self.wall.pensize(20)
+        self.wall.pendown()
+        for i in range(4):
+            self.wall.forward(800)
+            self.wall.right(90)
+        self.wall.penup()
 
-#food
-food = turtle.Turtle()
-food.speed(0)
-food.shape("square")
-food.color("red")
-food.penup()
-food.goto(-380, 380)
+        # food
+        self.food = turtle.Turtle()
+        self.food.speed(0)
+        self.food.shape("square")
+        self.food.color("red")
+        self.food.penup()
+        self.food.goto(-380, 380)
 
-segments = []
+        self.segments = []
 
-#score
-pen = turtle.Turtle()
-pen.speed(0)
-pen.shape("square")
-pen.color("gray")
-pen.penup()
-pen.hideturtle()
-pen.goto(0, 260)
-pen.write("Score: 0  High Score: 0", align="center", font=("Courier", 24, "normal"))
+        # score
+        self.pen = turtle.Turtle()
+        self.pen.speed(0)
+        self.pen.shape("square")
+        self.pen.color("gray")
+        self.pen.penup()
+        self.pen.hideturtle()
+        self.pen.goto(0, 260)
+        self.pen.write("Score: 0  High Score: 0", align="center", font=("Courier", 24, "normal"))
 
-#movement
-def move():
-    if head.direction == "up":
-        y = head.ycor()
-        head.sety(y + 20)
-    if head.direction == "down":
-        y = head.ycor()
-        head.sety(y - 20)
-    if head.direction == "left":
-        x = head.xcor()
-        head.setx(x - 20)
-    if head.direction == "right":
-        x = head.xcor()
-        head.setx(x + 20)
+        # Key press, dont need for AI
+        self.window.listen()
+        self.window.onkeypress(self.buttonUp, "w")
+        self.window.onkeypress(self.buttonDown, "s")
+        self.window.onkeypress(self.buttonLeft, "a")
+        self.window.onkeypress(self.buttonRight, "d")
+        self.window.onkeypress(self.buttonUp, "Up")
+        self.window.onkeypress(self.buttonDown, "Down")
+        self.window.onkeypress(self.buttonLeft, "Left")
+        self.window.onkeypress(self.buttonRight, "Right")
 
-def buttonUp():
-    if head.direction != "down":
-        head.direction = "up"
+        # game loop
+        while True:
 
-def buttonDown():
-    if head.direction != "up":
-        head.direction = "down"
+            self.window.update()
 
-def buttonLeft():
-    if head.direction != "right":
-        head.direction = "left"
+            if self.head.distance(self.food) < 20:
+                x = random.randint(-19, 19) * 20
+                y = random.randint(-19, 19) * 20
+                self.food.goto(x, y)
 
-def buttonRight():
-    if head.direction != "left":
-        head.direction = "right"
+                self.new_segment = turtle.Turtle()
+                self.new_segment.speed(0)
+                self.new_segment.shape("square")
+                self.new_segment.color("white")
+                self.new_segment.penup()
+                self.segments.append(self.new_segment)
 
-#Key press
-window.listen()
-window.onkeypress(buttonUp, "w")
-window.onkeypress(buttonDown, "s")
-window.onkeypress(buttonLeft, "a")
-window.onkeypress(buttonRight, "d")
-window.onkeypress(buttonUp, "Up")
-window.onkeypress(buttonDown, "Down")
-window.onkeypress(buttonLeft, "Left")
-window.onkeypress(buttonRight, "Right")
+                self.score += 100
 
-#game loop
-while True:
+                if self.score > self.high_score:
+                    self.high_score = self.score
 
-    window.update()
+            for body in range(len(self.segments) - 1, 0, -1):
+                x = self.segments[body - 1].xcor()
+                y = self.segments[body - 1].ycor()
+                self.segments[body].goto(x, y)
 
-    if head.distance(food) < 20:
-        x = random.randint(-19, 19) * 20
-        y = random.randint(-19, 19) * 20
-        food.goto(x, y)
+            if len(self.segments) > 0:
+                x = self.head.xcor()
+                y = self.head.ycor()
+                self.segments[0].goto(x, y)
 
-        new_segment = turtle.Turtle()
-        new_segment.speed(0)
-        new_segment.shape("square")
-        new_segment.color("white")
-        new_segment.penup()
-        segments.append(new_segment)
+            self.move()
 
-        score += 100
+            if self.head.xcor() > 390 or self.head.xcor() < -390 or self.head.ycor() > 390 or self.head.ycor() < -390:
 
-        if score > high_score:
-            high_score = score
+                self.head.goto(0, 0)
+                self.head.direction = "stop"
 
+                for segment in self.segments:
+                    segment.goto(10000, 10000)
+                self.segments.clear()
+                self.score = 0
 
-    for body in range(len(segments)-1, 0, -1):
-        x = segments[body-1].xcor()
-        y = segments[body-1].ycor()
-        segments[body].goto(x, y)
+            for segment in self.segments:
+                if self.head.distance(segment) < 20:
+                    time.sleep(0.5)
+                    self.head.goto(0, 0)
+                    self.head.direction = "stop"
 
-    if len(segments) > 0:
-        x = head.xcor()
-        y = head.ycor()
-        segments[0].goto(x, y)
+                    for segment in self.segments:
+                        segment.goto(10000, 10000)
+                    self.segments.clear()
+                    self.score = 0
 
-    move()
+            self.pen.clear()
+            self.pen.write("Score: {}  High Score: {}".format(self.score, self.high_score), align="center",
+                      font=("Courier", 24, "normal"))
 
-    if head.xcor()>390 or head.xcor()<-390 or head.ycor()>390 or head.ycor()<-390:
+            time.sleep(self.delay)
 
-        head.goto(0, 0)
-        head.direction = "stop"
+        self.window.mainloop()
 
-        for segment in segments:
-            segment.goto(10000, 10000)
-        segments.clear()
+    # movement
+    def move(self):
+        if self.head.direction == "up":
+            y = self.head.ycor()
+            self.head.sety(y + 20)
+        if self.head.direction == "down":
+            y = self.head.ycor()
+            self.head.sety(y - 20)
+        if self.head.direction == "left":
+            x = self.head.xcor()
+            self.head.setx(x - 20)
+        if self.head.direction == "right":
+            x = self.head.xcor()
+            self.head.setx(x + 20)
 
-        score = 0
+    def buttonUp(self):
+        if self.head.direction != "down":
+            self.head.direction = "up"
 
-    for segment in segments:
-        if head.distance(segment) < 20:
-            time.sleep(0.5)
-            head.goto(0, 0)
-            head.direction = "stop"
+    def buttonDown(self):
+        if self.head.direction != "up":
+            self.head.direction = "down"
 
-            for segment in segments:
-                segment.goto(10000, 10000)
-            segments.clear()
-            score = 0
+    def buttonLeft(self):
+        if self.head.direction != "right":
+            self.head.direction = "left"
 
-    pen.clear()
-    pen.write("Score: {}  High Score: {}".format(score, high_score), align="center", font=("Courier", 24, "normal"))
-
-    time.sleep(delay)
-
-window.mainloop()
-
-
-if __name__ == "__main__" :
-    print("main")
+    def buttonRight(self):
+        if self.head.direction != "left":
+            self.head.direction = "right"
